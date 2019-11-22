@@ -59,6 +59,8 @@ def get_stores(category=[]):
         columns = [d[0] for d in cur.description]
         for row in cur.fetchall():
             entry = dict(zip(columns,row))
+            if 'gps' in entry.keys():
+                entry['gps'] = list(eval(entry['gps']))
             cur.execute("SELECT day_of_week, open, close FROM business_hours WHERE business_hours.store_id = %s" % entry['id'])
             bh = []
             cols = [d[0] for d in cur.description]
@@ -81,4 +83,4 @@ def get_stores(category=[]):
 
 
 if __name__ == "__main__":
-    app.run(host='192.168.1.117', port=80)
+    app.run(host='localhost', port=80)
