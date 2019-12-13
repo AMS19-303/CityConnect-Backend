@@ -107,7 +107,7 @@ def order():
 
         lst_items = data['items']
         oid = uuid.uuid4().hex[:12]
-        cur.execute("INSERT INTO public.order (order_id, user_id, active, total_price, timestamp, address) VALUES (%s, %s, %s, %s, '%s', '%s')" % (oid, uid, active, total_price, delivery_date, address))
+        cur.execute("INSERT INTO public.order (order_id, user_id, active, total_price, timestamp, address) VALUES ('%s', %s, %s, %s, '%s', '%s')" % (oid, uid, active, total_price, delivery_date, address))
 
         for item in lst_items:
             if 'id' in item:
@@ -117,11 +117,11 @@ def order():
                 pid = item['id']
 
                 cur.execute("INSERT INTO order_item (quantity, cumul_price, discount, product_id, order_id)"
-                            + " VALUES (%s, %s, %s, %s, %s)" % (quant, price, discount, pid, oid))
+                            + " VALUES (%s, %s, %s, %s, '%s')" % (quant, price, discount, pid, oid))
             else:
                 req = item['name']
                 cur.execute("INSERT INTO order_item (quantity, cumul_price, discount, product_id, order_id, request)"
-                            + " VALUES (%s, %s, %s, %s, '%s')" % ('0', '0', '0', None, oid, req))
+                            + " VALUES (%s, %s, %s, '%s', '%s')" % ('0', '0', '0', None, oid, req))
 
 
 @app.route("/profile")
