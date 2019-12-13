@@ -123,7 +123,7 @@ def order():
                 cur.execute("INSERT INTO order_item (quantity, cumul_price, discount, product_id, order_id, request)"
                             + " VALUES (%s, %s, %s, null,'%s','%s')" % ('0', '0', '0', oid, req))
 
-        return jsonify([]), 200
+        return jsonify({'status':'OK'}), 200
 
 
 @app.route("/profile")
