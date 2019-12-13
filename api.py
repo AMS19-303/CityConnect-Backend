@@ -121,7 +121,7 @@ def order():
             else:
                 req = item['name']
                 cur.execute("INSERT INTO order_item (quantity, cumul_price, discount, product_id, order_id, request)"
-                            + " VALUES (%s, %s, %s, '%s','%s',%s)" % ('0', '0', '0', None, oid, req))
+                            + " VALUES (%s, %s, %s, '%s','%s','%s')" % ('0', '0', '0', None, oid, req))
 
 
 @app.route("/profile")
