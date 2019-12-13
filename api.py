@@ -112,7 +112,7 @@ def order():
         for item in lst_items:
             if 'id' in item:
                 quant = item['quantity']
-                price = item['cumul_price']
+                price = item['price']
                 discount = '0.0'
                 pid = item['id']
 
