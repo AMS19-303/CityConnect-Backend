@@ -74,8 +74,7 @@ def order():
 
                     cur.execute("SELECT name FROM store WHERE store_id = %s" % (res_p[0]['store_id'],))
                     name = str(cur.fetchone())
-                    res_p[0]['store_name'] = eval(name)[0]
-
+                    entry['store_name'] = eval(name)[0]
                     entry['product'] = res_p[0]
                 else:
                     entry['product_id'] = None
