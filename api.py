@@ -95,20 +95,25 @@ def order():
         return jsonify(res)
     else:
         data = request.get_json()
-        uid = data['user_id']
-        active = data['active']
-        total_price = data['total_price']
+        if 'user_id' in data:
+            uid = data['user_id']
+        else:
+            uid = '1'
+        active = 'true'
+        total_price = data['totalPrice']
+        delivery_date = data['deliveryDate']
+        address = data['address']
 
         lst_items = data['items']
 
-        cur.execute("INSERT INTO order (user_id, active, total_price) VALUES (%s, %s, %s)" % (uid, active, total_price))
+        cur.execute("INSERT INTO order (user_id, active, total_price, timestamp, address) VALUES (%s, %s, %s, %s, %s)" % (uid, active, total_price, delivery_date, address))
         oid = cur.lastrowid
 
         for item in lst_items:
             quant = item['quantity']
             price = item['cumul_price']
-            discount = item['discount']
-            pid = item['product_id']
+            discount = '0.0'
+            pid = item['id']
 
             cur.execute("INSERT INTO order_item (quantity, cumul_price, discount, product_id, order_id)"
                         + " VALUES (%s, %s, %s, %s, %s)" % (quant, price, discount, pid, oid))
@@ -148,7 +153,7 @@ def catalog():
     if conn and store:
         cur = conn.cursor()
         cur.execute(
-            "SELECT p.product_id, p.name, p.description, p.base_unit, p.unit, p.unit_price FROM product AS p WHERE p.store_id = %s" % (store,))
+            "SELECT p.product_id as id, p.name, p.description, p.base_unit, p.unit, p.unit_price FROM product AS p WHERE p.store_id = %s" % (store,))
         return jsonify([dict(zip([d[0] for d in cur.description], row)) for row in cur.fetchall()])
     return jsonify([])
 
