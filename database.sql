@@ -41,8 +41,6 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
-
 --
 -- Name: business_hours; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -64,7 +62,6 @@ ALTER TABLE public.business_hours OWNER TO postgres;
 --
 
 CREATE SEQUENCE public.business_hours_business_hours_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -99,7 +96,6 @@ ALTER TABLE public.category OWNER TO postgres;
 --
 
 CREATE SEQUENCE public.category_category_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -148,7 +144,6 @@ ALTER TABLE public.courier OWNER TO postgres;
 --
 
 CREATE SEQUENCE public.courier_courier_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -206,7 +201,6 @@ ALTER TABLE public.order_item OWNER TO postgres;
 --
 
 CREATE SEQUENCE public.order_item_order_item_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -268,7 +262,6 @@ COMMENT ON TABLE public.store IS 'Table containing information on each store';
 --
 
 CREATE SEQUENCE public.store_store_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -316,7 +309,6 @@ COMMENT ON TABLE public."user" IS 'User table';
 --
 
 CREATE SEQUENCE public.user_user_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
