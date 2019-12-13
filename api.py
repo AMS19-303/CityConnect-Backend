@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify
 import psycopg2.extras
-import json
-import datetime
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -45,7 +43,7 @@ def orders():
     active = bool(arglst["active"])
     user_id = int(arglst["id"])
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM order WHERE user_id = {user_id} and active = {active}")
+    cur.execute("SELECT * FROM order WHERE user_id = %s and active = %s" % (user_id, active))
     return jsonify([dict(zip([d[0] for d in cur.description], row)) for row in cur.fetchall()])
 
 
@@ -60,7 +58,7 @@ def order():
         res = get_orders(active)
 
         for d in res:
-            cur.execute(f"SELECT * FROM order_item WHERE order_id = '{d['order_id']}'")
+            cur.execute("SELECT * FROM order_item WHERE order_id = '%s'" % (d['order_id'],))
             items = []
             cols = [d[0] for d in cur.description]
 
@@ -70,11 +68,11 @@ def order():
 
                 if pid:
                     cur.execute(f"SELECT p.product_id AS id, p.name, p.type, p.description, p.store_id, p.unit_price, p.base_unit, p.unit FROM product AS p"
-                                f" WHERE p.product_id = {pid}")
+                                + " WHERE p.product_id = %s" % (pid,))
                     prod_cols = [d[0] for d in cur.description]
                     res_p = [dict(zip(prod_cols, row)) for row in cur.fetchall()]
 
-                    cur.execute(f"SELECT name FROM store WHERE store_id = {res_p[0]['store_id']}")
+                    cur.execute("SELECT name FROM store WHERE store_id = %s" % (res_p[0]['store_id'],))
                     name = str(cur.fetchone())
                     res_p[0]['store_name'] = eval(name)[0]
 
@@ -85,10 +83,10 @@ def order():
             d['items'] = items
 
             if active == 'false':
-                cur.execute(f"SELECT * FROM courier WHERE courier_id = {d['courier_id']}")
+                cur.execute("SELECT * FROM courier WHERE courier_id = %s" % (d['courier_id'], ))
                 res_courier = [dict(zip([d[0] for d in cur.description], row)) for row in cur.fetchall()]
 
-                cur.execute(f"SELECT * FROM public.user WHERE user_id = {res_courier[0]['user_id']}")
+                cur.execute("SELECT * FROM public.user WHERE user_id = %s" % (res_courier[0]['user_id'],))
                 res_user_c = [dict(zip([d[0] for d in cur.description], row)) for row in cur.fetchall()]
 
                 res_courier[0]['user'] = res_user_c[0]
@@ -104,7 +102,7 @@ def order():
 
         lst_items = data['items']
 
-        cur.execute(f"INSERT INTO order (user_id, active, total_price) VALUES ({uid}, {active}, {total_price})")
+        cur.execute("INSERT INTO order (user_id, active, total_price) VALUES (%s, %s, %s)" % (uid, active, total_price))
         oid = cur.lastrowid
 
         for item in lst_items:
@@ -113,8 +111,8 @@ def order():
             discount = item['discount']
             pid = item['product_id']
 
-            cur.execute(f"INSERT INTO order_item (quantity, cumul_price, discount, product_id, order_id)"
-                        f" VALUES ({quant}, {price}, {discount}, {pid}, {oid})")
+            cur.execute("INSERT INTO order_item (quantity, cumul_price, discount, product_id, order_id)"
+                        + " VALUES (%s, %s, %s, %s, %s)" % (quant, price, discount, pid, oid))
 
 
 @app.route("/profile")
@@ -124,11 +122,11 @@ def profile():
     if uid == -1:
         return jsonify([])
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM public.user WHERE user_id = {uid}")
+    cur.execute("SELECT * FROM public.user WHERE user_id = %s" % (uid,))
 
     res = [dict(zip([d[0] for d in cur.description], row)) for row in cur.fetchall()]
 
-    cur.execute(f"SELECT * FROM courier WHERE user_id = {res[0]['user_id']}")
+    cur.execute("SELECT * FROM courier WHERE user_id = %s" % (res[0]['user_id'],))
     cour_res = cur.fetchall()
     if cour_res:
         res[0]['courier'] = [dict(zip([d[0] for d in cur.description], row)) for row in cour_res]
@@ -151,7 +149,7 @@ def catalog():
     if conn and store:
         cur = conn.cursor()
         cur.execute(
-            f"SELECT p.product_id, p.name, p.description, p.base_unit, p.unit, p.unit_price FROM product AS p WHERE p.store_id = {store}")
+            "SELECT p.product_id, p.name, p.description, p.base_unit, p.unit, p.unit_price FROM product AS p WHERE p.store_id = %s" % (store,))
         return jsonify([dict(zip([d[0] for d in cur.description], row)) for row in cur.fetchall()])
     return jsonify([])
 
@@ -185,11 +183,11 @@ def get_stores(category=[]):
         elif len(category) == 1:
             cur.execute(
                 "SELECT DISTINCT ON (s.store_id) s.store_id AS id, s.name, s.type, s.photo, s.gps FROM store AS s, category_store AS cs, category AS c WHERE cs.store_id = s.store_id AND cs.category_id = c.category_id "
-                + f"AND cs.category_id = {int(category[0]):d}")
+                + "AND cs.category_id = %s" % (int(category[0]),))
         else:
             cur.execute(
                 "SELECT DISTINCT ON (s.store_id) s.store_id AS id, s.name, s.type, s.photo, s.gps FROM store AS s, category_store AS cs, category AS c WHERE cs.store_id = s.store_id AND cs.category_id = c.category_id "
-                + f"AND cs.category_id IN {str(tuple(category))}")
+                + f"AND cs.category_id IN %s" % (str(tuple(category)),))
         res = []
         columns = [d[0] for d in cur.description]
         for row in cur.fetchall():
@@ -197,7 +195,7 @@ def get_stores(category=[]):
             if 'gps' in entry.keys():
                 entry['gps'] = list(eval(entry['gps']))
             cur.execute(
-                f"SELECT day_of_week, open, close FROM business_hours WHERE business_hours.store_id = {entry['id']}")
+                "SELECT day_of_week, open, close FROM business_hours WHERE business_hours.store_id = %s" % (entry['id'],))
             bh = []
             cols = [d[0] for d in cur.description]
             for d, o, c in cur.fetchall():
@@ -206,7 +204,7 @@ def get_stores(category=[]):
                 bh.append(dict(zip(cols, (d, o, c))))
             entry['business_hours'] = bh
             cur.execute(
-                f"SELECT c.name FROM category_store AS cs, category AS c, store AS s WHERE cs.category_id = c.category_id AND cs.store_id = s.store_id AND s.store_id = {entry['id']}")
+                "SELECT c.name FROM category_store AS cs, category AS c, store AS s WHERE cs.category_id = c.category_id AND cs.store_id = s.store_id AND s.store_id = %s" % (entry['id'],))
             cat = []
             for name in cur.fetchall():
                 cat.append(name[0])
@@ -223,7 +221,7 @@ def get_orders(active='true'):
     if active not in ['true', 'false']:
         return []
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM public.order WHERE active = '{active}'")
+    cur.execute("SELECT * FROM public.order WHERE active = '%s'" % (active,))
     res = [dict(zip([d[0] for d in cur.description], row)) for row in cur.fetchall()]
     for d in res:
         d['timestamp'] = d['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
@@ -232,7 +230,9 @@ def get_orders(active='true'):
 
 if __name__ == "__main__":
     try:
-        app.run(host='192.168.1.117', port=80)
+        app.run(host='', port=80)
+    except KeyboardInterrupt:
+        pass
     finally:
         db_close()
         print("Goodbye!")
