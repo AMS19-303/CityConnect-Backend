@@ -107,7 +107,7 @@ def order():
 
         lst_items = data['items']
         oid = uuid.uuid4().hex[:12]
-        cur.execute("INSERT INTO public.order (order_id, user_id, active, total_price, timestamp, address) VALUES (%s, %s, %s, %s, '%s', '%s')" % (oid, active, total_price, delivery_date, address))
+        cur.execute("INSERT INTO public.order (order_id, user_id, active, total_price, timestamp, address) VALUES (%s, %s, %s, %s, '%s', '%s')" % (oid, uid, active, total_price, delivery_date, address))
 
         for item in lst_items:
             if 'id' in item:
