@@ -67,7 +67,7 @@ def order():
                 pid = entry['product_id']
 
                 if pid:
-                    cur.execute(f"SELECT p.product_id AS id, p.name, p.type, p.description, p.store_id, p.unit_price, p.base_unit, p.unit FROM product AS p"
+                    cur.execute("SELECT p.product_id AS id, p.name, p.type, p.description, p.store_id, p.unit_price, p.base_unit, p.unit FROM product AS p"
                                 + " WHERE p.product_id = %s" % (pid,))
                     prod_cols = [d[0] for d in cur.description]
                     res_p = [dict(zip(prod_cols, row)) for row in cur.fetchall()]
@@ -187,7 +187,7 @@ def get_stores(category=[]):
         else:
             cur.execute(
                 "SELECT DISTINCT ON (s.store_id) s.store_id AS id, s.name, s.type, s.photo, s.gps FROM store AS s, category_store AS cs, category AS c WHERE cs.store_id = s.store_id AND cs.category_id = c.category_id "
-                + f"AND cs.category_id IN %s" % (str(tuple(category)),))
+                + "AND cs.category_id IN %s" % (str(tuple(category)),))
         res = []
         columns = [d[0] for d in cur.description]
         for row in cur.fetchall():
