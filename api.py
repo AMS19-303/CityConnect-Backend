@@ -106,7 +106,7 @@ def order():
 
         lst_items = data['items']
 
-        cur.execute("INSERT INTO public.order (user_id, active, total_price, timestamp, address) VALUES (%s, %s, %s, %s, %s)" % (uid, active, total_price, delivery_date, address))
+        cur.execute("INSERT INTO public.order (user_id, active, total_price, timestamp, address) VALUES (%s, %s, %s, '%s', %s)" % (uid, active, total_price, delivery_date, address))
         oid = cur.lastrowid
 
         for item in lst_items:
